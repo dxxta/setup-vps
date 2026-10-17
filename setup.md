@@ -53,3 +53,27 @@ PermitRootLogin no
 systemctl restart sshd
 ```
 
+# Firewall
+
+Now we have done setting up our basic configuration for the server. Next we are gonna double up the protection by enabling firewall. Here is what we do below,
+
+```bash
+ssh frayoneon@ip_address -p 22220
+sudo su && cd # we need to be root to do this
+
+# enable firewall
+ufw status # at this state it should be inactive
+# we need to allow default access to vps's port
+ufw allow 22220/tcp
+ufw enable
+ufw status # now the state would be active
+```
+
+> these are useful command according to ufw
+```bash
+# check firewall status
+ufw status
+
+# reload firewall
+ufw reload # now the state would be active
+```
