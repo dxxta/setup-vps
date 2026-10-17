@@ -77,3 +77,73 @@ ufw status
 # reload firewall
 ufw reload # now the state would be active
 ```
+
+# Additional
+
+At this state, we have done configure our vps to be safer from any malicious threat out there. Now we are gonna do an optional steps to monitor our vps that support any device.
+
+- install glances
+```bash
+sudo apt update && sudo apt install -y glances
+```
+
+- install btop
+```bash
+sudo apt update && sudo apt install -y btop
+```
+
+- install nethogs
+```bash
+sudo apt update && sudo apt install -y nethogs
+```
+
+- install essential package bundle
+```bash
+sudo apt update && sudo apt install build-essential
+```
+
+- edit makefile
+```bash
+nano ~/Makefile
+```
+
+- add this scripts into makefile
+```bash
+.PHONY: default cpu mem net run-all
+# Native Top Snapshot
+default:
+	@echo "\033[1;36m=== Native Top Snapshot (Summary) ===\033[0m"
+	@top -b -n 1 | head -n 5
+	@echo ""
+# Top 5 CPU Processes
+cpu:
+	@echo "\033[1;32m=== Top 5 CPU Processes ===\033[0m"
+	@printf "\033[1;33m%-10s %-10s %-10s %s\033[0m\n" "PID" "%CPU" "%MEM" "COMMAND"
+	@ps aux --sort=-%cpu | head -n 6 | tail -n +2 | awk '{printf "%-10s %-10s %-10s ", $$2, $$3, $$4; $$1=$$2=$$3=$$4=$$5=$$6=$$7=$$8=$$9=$$10=""; print $$0}'
+	@echo ""
+# Top 5 Memory Processes
+mem:
+	@echo "\033[1;32m=== Top 5 Memory Processes ===\033[0m"
+	@printf "\033[1;33m%-10s %-10s %-10s %s\033[0m\n" "PID" "%CPU" "%MEM" "COMMAND"
+	@ps aux --sort=-%mem | head -n 6 | tail -n +2 | awk '{printf "%-10s %-10s %-10s ", $$2, $$3, $$4; $$1=$$2=$$3=$$4=$$5=$$6=$$7=$$8=$$9=$$10=""; print $$0}'
+	@echo ""
+# Top 5 Network Processes
+net:
+	@echo "\033[1;32m=== Top 5 Network Processes (Bandwidth) ===\033[0m"
+	@if command -v nethogs >/dev/null 2>&1; then \
+		sudo nethogs -c 5 -t | head -n 12; \
+	else \
+		echo "\033[0;31m[Notice] 'nethogs' is required to fetch network bandwidth.\033[0m"; \
+		echo "Install it using: \033[1;37msudo apt install -y nethogs\033[0m"; \
+	fi
+	@echo ""
+# Runs all of them in order
+run-all: default cpu mem net
+```
+
+- now run this
+```bash
+make
+# or
+make cpu
+```
